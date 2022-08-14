@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	Database DBConf    `json:"database"`
-	Logger   LoggerCfg `json:"logs"`
-	Queue    QueueCfg  `json:"queue"`
+	Database DBConf     `json:"database"`
+	Logger   LoggerCfg  `json:"logs"`
+	Queue    QueueCfg   `json:"queue"`
+	Server   Connection `json:"server"`
 }
 
 type DBConf struct {
@@ -27,6 +28,11 @@ type QueueCfg struct {
 	DSN      string `json:"dsn"`
 	Exchange string `json:"exchange"`
 	Queue    string `json:"queue"`
+}
+
+type Connection struct {
+	Host string `json:"host"`
+	Port string `json:"port"`
 }
 
 func LoadConfig() (Config, error) {

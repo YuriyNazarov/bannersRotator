@@ -16,8 +16,7 @@ type Logger struct {
 var levels = map[string]int{
 	"debug": 0,
 	"info":  1,
-	"warn":  2,
-	"error": 3,
+	"error": 2,
 }
 
 func NewLogger(cfg config.LoggerCfg) *Logger {
@@ -36,7 +35,7 @@ func NewLogger(cfg config.LoggerCfg) *Logger {
 	lvl, ok := levels[cfg.Level]
 	if !ok {
 		logger.output.Write([]byte("Could not parse log level, setting to \"error\""))
-		lvl = 3
+		lvl = 2
 	}
 	logger.level = lvl
 	return &logger
@@ -52,13 +51,6 @@ func (l Logger) Info(msg string) {
 func (l Logger) Error(msg string) {
 	msg = "[ERROR] " + time.Now().Format(time.RFC3339) + " " + msg + "\n"
 	l.output.Write([]byte(msg))
-}
-
-func (l Logger) Warn(msg string) {
-	msg = "[WARNING] " + time.Now().Format(time.RFC3339) + " " + msg + "\n"
-	if l.level <= 2 {
-		l.output.Write([]byte(msg))
-	}
 }
 
 func (l Logger) Debug(msg string) {

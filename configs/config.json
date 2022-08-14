@@ -1,5 +1,18 @@
 {
   "database": {
     "dsn": "postgres://postgres:postgres@localhost:5432/banners_rotator?sslmode=disable"
+  },
+  "logs": {
+    "level": "debug",
+    "destination": "STDERR"
+  },
+  "queue": {
+    "dsn": "amqp://guest:guest@localhost:5672/",
+    "exchange": "calendar",
+    "queue": "calendar_q"
+  },
+  "server": {
+    "host": "localhost",
+    "port": "8080"
   }
 }

@@ -1,15 +1,17 @@
 -- +goose Up
 -- +goose StatementBegin
-create table if not exists banners
+create table if not exists slots
 (
     id serial
-    constraint banners_pk
-    primary key,
+        constraint slots_pk
+            primary key,
     description text
-    );
+);
+
+
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-drop table banners;
+drop table slots;
 -- +goose StatementEnd

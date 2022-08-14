@@ -2,9 +2,11 @@ package amqp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/YuriyNazarov/bannersRotator/internal/app"
 	"github.com/YuriyNazarov/bannersRotator/internal/config"
+	"time"
 
 	goamqp "github.com/rabbitmq/amqp091-go"
 )
@@ -15,6 +17,34 @@ type Rabbit struct {
 	consumer string
 	channel  *goamqp.Channel
 	logger   app.Logger
+}
+
+func (q *Rabbit) Click(bannerId, slotId, groupId int, clickTime time.Time) {
+	msg := statsMessage{
+		BannerId:   bannerId,
+		SlotId:     slotId,
+		GroupId:    groupId,
+		Timestamp:  clickTime,
+		ActionType: "click",
+	}
+	err := q.add(context.Background(), msg)
+	if err != nil {
+		q.logger.Error(fmt.Sprintf("err on sending click event: %s", err))
+	}
+}
+
+func (q *Rabbit) Show(bannerId, slotId, groupId int, clickTime time.Time) {
+	msg := statsMessage{
+		BannerId:   bannerId,
+		SlotId:     slotId,
+		GroupId:    groupId,
+		Timestamp:  clickTime,
+		ActionType: "show",
+	}
+	err := q.add(context.Background(), msg)
+	if err != nil {
+		q.logger.Error(fmt.Sprintf("err on sending show event: %s", err))
+	}
 }
 
 func NewRabbit(ctx context.Context, logger app.Logger, cfg config.QueueCfg) *Rabbit {
@@ -81,4 +111,27 @@ func NewRabbit(ctx context.Context, logger app.Logger, cfg config.QueueCfg) *Rab
 		channel:  chanel,
 		logger:   logger,
 	}
+}
+
+func (q *Rabbit) add(ctx context.Context, msg statsMessage) error {
+	payload, err := json.Marshal(msg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal banner event: %w", err)
+	}
+
+	err = q.channel.PublishWithContext(
+		ctx,
+		q.exchange,
+		q.queue,
+		false,
+		false,
+		goamqp.Publishing{
+			ContentType: "application/json",
+			Body:        payload,
+		})
+	if err != nil {
+		return fmt.Errorf("failed send statistics: %w", err)
+	}
+
+	return nil
 }
