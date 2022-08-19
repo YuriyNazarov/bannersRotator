@@ -1,9 +1,10 @@
 package app
 
 import (
-	"github.com/YuriyNazarov/bannersRotator/internal/storage"
 	"math"
 	"math/rand"
+
+	"github.com/YuriyNazarov/bannersRotator/internal/storage"
 )
 
 func selectBanner(stats []storage.BannerStat) (int, error) {
@@ -22,13 +23,13 @@ func selectBanner(stats []storage.BannerStat) (int, error) {
 	// создать список не показанных
 	for _, bannerStat := range stats {
 		if bannerStat.Views == 0 {
-			bannerIds = append(bannerIds, bannerStat.BannerId)
+			bannerIds = append(bannerIds, bannerStat.BannerID)
 		}
 	}
 	// если есть новый баннер - покажем его. инициализация
 	if len(bannerIds) > 0 {
 		// случайный баннер из новых
-		return bannerIds[rand.Intn(len(bannerIds))], nil
+		return bannerIds[rand.Intn(len(bannerIds))], nil //nolint:gosec
 	}
 
 	// новых нет. создать список баннеров с макс доходом
@@ -42,12 +43,12 @@ func selectBanner(stats []storage.BannerStat) (int, error) {
 		if bannerIncome > maxIncome {
 			maxIncome = bannerIncome
 			bannerIds = bannerIds[:0]
-			bannerIds = append(bannerIds, bannerStat.BannerId)
+			bannerIds = append(bannerIds, bannerStat.BannerID)
 		} else if bannerIncome == maxIncome {
-			bannerIds = append(bannerIds, bannerStat.BannerId)
+			bannerIds = append(bannerIds, bannerStat.BannerID)
 		}
 	}
 
 	// случайный баннер из лучших
-	return bannerIds[rand.Intn(len(bannerIds))], nil
+	return bannerIds[rand.Intn(len(bannerIds))], nil //nolint:gosec
 }

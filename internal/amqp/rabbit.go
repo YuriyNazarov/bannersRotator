@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/YuriyNazarov/bannersRotator/internal/config"
 	"time"
 
+	"github.com/YuriyNazarov/bannersRotator/internal/config"
 	goamqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -18,11 +18,11 @@ type Rabbit struct {
 	logger   Logger
 }
 
-func (q *Rabbit) Click(bannerId, slotId, groupId int, clickTime time.Time) {
+func (q *Rabbit) Click(bannerID, slotID, groupID int, clickTime time.Time) {
 	msg := statsMessage{
-		BannerId:   bannerId,
-		SlotId:     slotId,
-		GroupId:    groupId,
+		BannerID:   bannerID,
+		SlotID:     slotID,
+		GroupID:    groupID,
 		Timestamp:  clickTime,
 		ActionType: "click",
 	}
@@ -32,11 +32,11 @@ func (q *Rabbit) Click(bannerId, slotId, groupId int, clickTime time.Time) {
 	}
 }
 
-func (q *Rabbit) Show(bannerId, slotId, groupId int, clickTime time.Time) {
+func (q *Rabbit) Show(bannerID, slotID, groupID int, clickTime time.Time) {
 	msg := statsMessage{
-		BannerId:   bannerId,
-		SlotId:     slotId,
-		GroupId:    groupId,
+		BannerID:   bannerID,
+		SlotID:     slotID,
+		GroupID:    groupID,
 		Timestamp:  clickTime,
 		ActionType: "show",
 	}

@@ -3,8 +3,8 @@ package amqp
 import "time"
 
 type StatsOutput interface {
-	Click(bannerId, slotId, groupId int, clickTime time.Time)
-	Show(bannerId, slotId, groupId int, clickTime time.Time)
+	Click(bannerID, slotID, groupID int, clickTime time.Time)
+	Show(bannerID, slotID, groupID int, clickTime time.Time)
 }
 
 type Logger interface {
@@ -14,9 +14,9 @@ type Logger interface {
 }
 
 type statsMessage struct {
-	BannerId   int       `json:"bannerId"`
-	SlotId     int       `json:"slotId"`
-	GroupId    int       `json:"groupId"`
+	BannerID   int       `json:"bannerId"`
+	SlotID     int       `json:"slotId"`
+	GroupID    int       `json:"groupId"`
 	Timestamp  time.Time `json:"timestamp"`
 	ActionType string    `json:"actionType"`
 }

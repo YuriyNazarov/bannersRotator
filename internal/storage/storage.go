@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/lib/pq" // Postgres driver
@@ -17,16 +18,16 @@ const (
 	click
 )
 
-func (s *Storage) AddToSlot(bannerId, slotId int) error {
+func (s *Storage) AddToSlot(bannerID, slotID int) error {
 	query := "select banner_id from banners_to_slots where banner_id = $1 and slot_id = $2"
-	row := s.db.QueryRow(query, bannerId, slotId)
+	row := s.db.QueryRow(query, bannerID, slotID)
 	var id string
 	err := row.Scan(id)
-	if err != sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return ErrLinkExists
 	}
 	query = "insert into banners_to_slots (banner_id, slot_id) values ($1, $2)"
-	_, err = s.db.Exec(query, bannerId, slotId)
+	_, err = s.db.Exec(query, bannerID, slotID)
 	if err != nil {
 		s.log.Error(fmt.Sprintf("err on creating banner_to_slot: %s", err))
 		return ErrOperationFail
@@ -34,9 +35,9 @@ func (s *Storage) AddToSlot(bannerId, slotId int) error {
 	return nil
 }
 
-func (s *Storage) DropFromSlot(bannerId, slotId int) error {
+func (s *Storage) DropFromSlot(bannerID, slotID int) error {
 	query := "delete from banners_to_slots where banner_id = $1 and slot_id = $2"
-	_, err := s.db.Exec(query, bannerId, slotId)
+	_, err := s.db.Exec(query, bannerID, slotID)
 	if err != nil {
 		s.log.Error(fmt.Sprintf("err on deleting banner_to_slot: %s", err))
 		return ErrOperationFail
@@ -44,17 +45,17 @@ func (s *Storage) DropFromSlot(bannerId, slotId int) error {
 	return nil
 }
 
-func (s *Storage) Click(bannerId, slotId, groupId int) error {
-	return s.addAction(bannerId, slotId, groupId, click)
+func (s *Storage) Click(bannerID, slotID, groupID int) error {
+	return s.addAction(bannerID, slotID, groupID, click)
 }
 
-func (s *Storage) Show(bannerId, slotId, groupId int) error {
-	return s.addAction(bannerId, slotId, groupId, view)
+func (s *Storage) Show(bannerID, slotID, groupID int) error {
+	return s.addAction(bannerID, slotID, groupID, view)
 }
 
-func (s *Storage) addAction(bannerId, slotId, groupId, actionId int) error {
+func (s *Storage) addAction(bannerID, slotID, groupID, actionID int) error {
 	query := "insert into actions (action_type, banner_id, slot_id, dem_group_id) values ($1, $2, $3, $4)"
-	_, err := s.db.Exec(query, actionId, bannerId, slotId, groupId)
+	_, err := s.db.Exec(query, actionID, bannerID, slotID, groupID)
 	if err != nil {
 		s.log.Error(fmt.Sprintf("err on saving action: %s", err))
 		return ErrOperationFail
@@ -62,7 +63,7 @@ func (s *Storage) addAction(bannerId, slotId, groupId, actionId int) error {
 	return nil
 }
 
-func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
+func (s *Storage) GetStats(slotID, groupID int) ([]BannerStat, error) {
 	query := `select banners_to_slots.banner_id, coalesce(cnt, 0) as cnt, coalesce(action_type, 0) as action_type
 		from banners_to_slots
 		left join (
@@ -73,9 +74,9 @@ func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
 			group by action_type, banner_id
 			) stats on stats.banner_id = banners_to_slots.banner_id
 			where slot_id = $1;`
-	rows, err := s.db.Query(query, slotId, groupId)
+	rows, err := s.db.Query(query, slotID, groupID)
 	var (
-		bannerId, count, actionId int
+		bannerID, count, actionID int
 		bannerStat                BannerStat
 		ok                        bool
 	)
@@ -88,27 +89,21 @@ func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&bannerId, &count, &actionId)
+		err = rows.Scan(&bannerID, &count, &actionID)
 		if err != nil {
 			s.log.Error(fmt.Sprintf("err on scanning stats: %s", err))
 			continue
 		}
-		bannerStat, ok = statMap[bannerId]
-		if ok {
-			if actionId == view {
-				bannerStat.Views = count
-			} else {
-				bannerStat.Clicks = count
-			}
-		} else {
-			bannerStat = BannerStat{BannerId: bannerId}
-			if actionId == view {
-				bannerStat.Views = count
-			} else {
-				bannerStat.Clicks = count
-			}
+		bannerStat, ok = statMap[bannerID]
+		if !ok {
+			bannerStat = BannerStat{BannerID: bannerID}
 		}
-		statMap[bannerId] = bannerStat
+		if actionID == view {
+			bannerStat.Views = count
+		} else {
+			bannerStat.Clicks = count
+		}
+		statMap[bannerID] = bannerStat
 	}
 	if rows.Err() != nil {
 		s.log.Error(fmt.Sprintf("err after scanning stats: %s", err))
@@ -123,9 +118,9 @@ func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
 	return stats, nil
 }
 
-func (s *Storage) GetAllBanners(slotId int) ([]int, error) {
+func (s *Storage) GetAllBanners(slotID int) ([]int, error) {
 	query := "select banner_id from banners_to_slots where slot_id = $1"
-	rows, err := s.db.Query(query, slotId)
+	rows, err := s.db.Query(query, slotID)
 	if err != nil {
 		s.log.Error(fmt.Sprintf("err on getting banners: %s", err))
 		return []int{}, ErrOperationFail
@@ -182,8 +177,7 @@ func (s *Storage) Connect(dsn string) error {
 }
 
 func (s *Storage) Close() {
-	err := s.db.Close()
-	if err != nil {
+	if err := s.db.Close(); err != nil {
 		s.log.Error(fmt.Sprintf("err on clolsing db connection: %s", err))
 	}
 }

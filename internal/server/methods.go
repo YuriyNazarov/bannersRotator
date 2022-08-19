@@ -108,12 +108,12 @@ func (m *Muxer) banner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bannerId, err := m.app.GetBanner(request.SlotID, request.GroupId)
+	bannerID, err := m.app.GetBanner(request.SlotID, request.GroupID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	w.Write([]byte(fmt.Sprintf(`{"banner_id":%d}`, bannerId)))
+	w.Write([]byte(fmt.Sprintf(`{"banner_id":%d}`, bannerID)))
 }

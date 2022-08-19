@@ -1,3 +1,4 @@
+//nolint:tagliatelle
 package server
 
 import (
@@ -28,7 +29,7 @@ type clickRequest struct {
 
 type showRequest struct {
 	SlotID  int `json:"slot_id"`
-	GroupId int `json:"group_id"`
+	GroupID int `json:"group_id"`
 }
 
 func parseBannerRequest(r *http.Request) (bannerRequest, error) {
@@ -73,24 +74,24 @@ func parseClickRequest(r *http.Request) (clickRequest, error) {
 }
 
 func parseShowRequest(r *http.Request) (showRequest, error) {
-	slotId := r.URL.Query().Get("slot_id")
-	if slotId == "" {
+	slotID := r.URL.Query().Get("slot_id")
+	if slotID == "" {
 		return showRequest{}, fmt.Errorf("%w: slot_id", errRequiredMissing)
 	}
-	iSlotId, err := strconv.Atoi(slotId)
+	iSlotID, err := strconv.Atoi(slotID)
 	if err != nil {
 		return showRequest{}, fmt.Errorf("%w: slot_id is not int", errInvalidPayload)
 	}
-	groupId := r.URL.Query().Get("slot_id")
-	if slotId == "" {
+	groupID := r.URL.Query().Get("slot_id")
+	if groupID == "" {
 		return showRequest{}, fmt.Errorf("%w: group_id", errRequiredMissing)
 	}
-	iGroupId, err := strconv.Atoi(groupId)
+	iGroupID, err := strconv.Atoi(groupID)
 	if err != nil {
 		return showRequest{}, fmt.Errorf("%w: group_id is not int", errInvalidPayload)
 	}
 	return showRequest{
-		SlotID:  iSlotId,
-		GroupId: iGroupId,
+		SlotID:  iSlotID,
+		GroupID: iGroupID,
 	}, nil
 }

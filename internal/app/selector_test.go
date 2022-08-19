@@ -1,17 +1,18 @@
 package app
 
 import (
+	"testing"
+
 	"github.com/YuriyNazarov/bannersRotator/internal/storage"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestBestBanner(t *testing.T) {
 	bannerStats := []storage.BannerStat{
-		{BannerId: 1, Views: 10, Clicks: 0},
-		{BannerId: 2, Views: 10, Clicks: 5},
-		{BannerId: 3, Views: 10, Clicks: 10},
-		{BannerId: 4, Views: 10, Clicks: 0},
+		{BannerID: 1, Views: 10, Clicks: 0},
+		{BannerID: 2, Views: 10, Clicks: 5},
+		{BannerID: 3, Views: 10, Clicks: 10},
+		{BannerID: 4, Views: 10, Clicks: 0},
 	}
 
 	expectedID := 3
@@ -22,10 +23,10 @@ func TestBestBanner(t *testing.T) {
 
 func TestShowAllBanners(t *testing.T) {
 	bannerStats := []storage.BannerStat{
-		{BannerId: 1, Views: 99999, Clicks: 1},
-		{BannerId: 2, Views: 99999, Clicks: 1},
-		{BannerId: 3, Views: 99999, Clicks: 1},
-		{BannerId: 4, Views: 99999, Clicks: 1},
+		{BannerID: 1, Views: 99999, Clicks: 1},
+		{BannerID: 2, Views: 99999, Clicks: 1},
+		{BannerID: 3, Views: 99999, Clicks: 1},
+		{BannerID: 4, Views: 99999, Clicks: 1},
 	}
 
 	var (

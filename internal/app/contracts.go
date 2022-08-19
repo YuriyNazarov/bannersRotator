@@ -9,6 +9,4 @@ type Logger interface {
 	Debug(msg string)
 }
 
-var (
-	ErrNoBanners = errors.New("no banners available for selected slot")
-)
+var ErrNoBanners = errors.New("no banners available for selected slot")

@@ -3,8 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/YuriyNazarov/bannersRotator/internal/app"
 	"net/http"
+
+	"github.com/YuriyNazarov/bannersRotator/internal/app"
 )
 
 type Server struct {
@@ -15,10 +16,10 @@ type Server struct {
 }
 
 type Application interface {
-	GetBanner(slotId, groupId int) (int, error)
-	AddBanner(bannerId, slotId int) error
-	DeleteBanner(bannerId, slotId int) error
-	RegisterClick(bannerId, slotId, groupId int) error
+	GetBanner(slotID, groupID int) (int, error)
+	AddBanner(bannerID, slotID int) error
+	DeleteBanner(bannerID, slotID int) error
+	RegisterClick(bannerID, slotID, groupID int) error
 }
 
 func NewServer(logger app.Logger, app Application, addr string) *Server {
@@ -45,8 +46,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	err := s.server.Shutdown(ctx)
-	if err != nil {
+	if err := s.server.Shutdown(ctx); err != nil {
 		s.logger.Error(fmt.Sprintf("err on server shutdown: %s", err))
 	}
 	return nil

@@ -2,10 +2,11 @@ package logger
 
 import (
 	"fmt"
-	"github.com/YuriyNazarov/bannersRotator/internal/config"
 	"io"
 	"os"
 	"time"
+
+	"github.com/YuriyNazarov/bannersRotator/internal/config"
 )
 
 type Logger struct {
@@ -61,8 +62,7 @@ func (l Logger) Debug(msg string) {
 }
 
 func (l *Logger) Close() {
-	err := l.output.Close()
-	if err != nil {
+	if err := l.output.Close(); err != nil {
 		fmt.Println("!!! error on closing logger: ", err)
 	}
 }
