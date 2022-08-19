@@ -31,6 +31,9 @@ func main() {
 	amqp := internalamqp.NewRabbit(ctx, logg, config.Queue)
 
 	storage := internalstorage.New(logg, config.Database.DSN)
+	if storage == nil {
+		log.Fatal("Failed to run app: storage error")
+	}
 	defer storage.Close()
 
 	app := internalapp.New(logg, storage, amqp)

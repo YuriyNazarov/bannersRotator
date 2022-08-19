@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/YuriyNazarov/bannersRotator/internal/app"
 	"github.com/YuriyNazarov/bannersRotator/internal/config"
 	"time"
 
@@ -16,7 +15,7 @@ type Rabbit struct {
 	queue    string
 	consumer string
 	channel  *goamqp.Channel
-	logger   app.Logger
+	logger   Logger
 }
 
 func (q *Rabbit) Click(bannerId, slotId, groupId int, clickTime time.Time) {
@@ -47,7 +46,7 @@ func (q *Rabbit) Show(bannerId, slotId, groupId int, clickTime time.Time) {
 	}
 }
 
-func NewRabbit(ctx context.Context, logger app.Logger, cfg config.QueueCfg) *Rabbit {
+func NewRabbit(ctx context.Context, logger Logger, cfg config.QueueCfg) *Rabbit {
 	conn, err := goamqp.Dial(cfg.DSN)
 	if err != nil {
 		logger.Error(fmt.Sprintf("failed on connect to rabblitmq: %s", err))

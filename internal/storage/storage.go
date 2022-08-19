@@ -3,6 +3,8 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq" // Postgres driver
 )
 
 type Storage struct {
@@ -16,7 +18,7 @@ const (
 )
 
 func (s *Storage) AddToSlot(bannerId, slotId int) error {
-	query := "select banner_id from banners_to_slots where banner_id = $q and slot_id = $2"
+	query := "select banner_id from banners_to_slots where banner_id = $1 and slot_id = $2"
 	row := s.db.QueryRow(query, bannerId, slotId)
 	var id string
 	err := row.Scan(id)
@@ -33,7 +35,7 @@ func (s *Storage) AddToSlot(bannerId, slotId int) error {
 }
 
 func (s *Storage) DropFromSlot(bannerId, slotId int) error {
-	query := "delete from banners_to_slots where banner_id = $q and slot_id = $2"
+	query := "delete from banners_to_slots where banner_id = $1 and slot_id = $2"
 	_, err := s.db.Exec(query, bannerId, slotId)
 	if err != nil {
 		s.log.Error(fmt.Sprintf("err on deleting banner_to_slot: %s", err))
@@ -61,7 +63,7 @@ func (s *Storage) addAction(bannerId, slotId, groupId, actionId int) error {
 }
 
 func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
-	query := `select banners_to_slots.banner_id, coalesce(cnt, 0) as cnt, action_type
+	query := `select banners_to_slots.banner_id, coalesce(cnt, 0) as cnt, coalesce(action_type, 0) as action_type
 		from banners_to_slots
 		left join (
 		select count(action_type) as cnt, action_type, banner_id
@@ -86,7 +88,7 @@ func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(bannerId, count, actionId)
+		err = rows.Scan(&bannerId, &count, &actionId)
 		if err != nil {
 			s.log.Error(fmt.Sprintf("err on scanning stats: %s", err))
 			continue
@@ -109,7 +111,7 @@ func (s *Storage) GetStats(slotId, groupId int) ([]BannerStat, error) {
 		statMap[bannerId] = bannerStat
 	}
 	if rows.Err() != nil {
-		s.log.Error(fmt.Sprintf("err on scanning stats: %s", err))
+		s.log.Error(fmt.Sprintf("err after scanning stats: %s", err))
 	}
 	stats := make([]BannerStat, len(statMap))
 	i := 0
@@ -135,7 +137,7 @@ func (s *Storage) GetAllBanners(slotId int) ([]int, error) {
 		banner  int
 	)
 	for rows.Next() {
-		err = rows.Scan(banner)
+		err = rows.Scan(&banner)
 		if err != nil {
 			s.log.Error(fmt.Sprintf("err on scanning banners: %s", err))
 			continue
@@ -158,6 +160,7 @@ func New(l Logger, dsn string) *Storage {
 	err := storageInstance.Connect(dsn)
 	if err != nil {
 		l.Error(fmt.Sprintf("error occupied on connecting to DB: %s", err))
+		return nil
 	}
 	return &storageInstance
 }

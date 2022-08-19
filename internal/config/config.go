@@ -41,7 +41,7 @@ func LoadConfig() (Config, error) {
 	if err != nil {
 		return config, fmt.Errorf("could not open config file: %w", err)
 	}
-	path := filepath.Join(pwd, "../../configs/config.json")
+	path := filepath.Join(pwd, "./configs/config.json")
 	file, err := os.Open(path)
 	if err != nil {
 		return config, fmt.Errorf("could not open config file: %w", err)

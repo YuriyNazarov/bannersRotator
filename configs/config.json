@@ -8,8 +8,8 @@
   },
   "queue": {
     "dsn": "amqp://guest:guest@localhost:5672/",
-    "exchange": "calendar",
-    "queue": "calendar_q"
+    "exchange": "banners",
+    "queue": "banners_q"
   },
   "server": {
     "host": "localhost",

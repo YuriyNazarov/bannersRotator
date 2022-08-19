@@ -5,7 +5,13 @@ build:
 	go build -v -o $(BIN) ./cmd/rotator
 
 run: build
-	$(BIN) --config ./configs/config.example.json
+	$(BIN)
 
 migrate:
 	goose --dir=migrations postgres ${DB_CONN} up
+
+install-lint-deps:
+	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
+
+lint: install-lint-deps
+	golangci-lint run ./...
