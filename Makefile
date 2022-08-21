@@ -18,3 +18,9 @@ lint: install-lint-deps
 
 test:
 	go test -race ./internal/... -count 100
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down
