@@ -56,15 +56,3 @@ services:
       - 8000:8000
     networks:
       - localnet
-
-#  tests:
-#    container_name: tests
-#    build:
-#      context: .
-#      dockerfile: ./build/tests/Dockerfile
-#    ports:
-#      - 8000:8000
-#    volumes:
-#      - ../logs/tests:/var/logs
-#    networks:
-#      - localnet
