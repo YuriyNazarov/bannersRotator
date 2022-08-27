@@ -1,0 +1,58 @@
+version: "3.4"
+
+networks:
+  localnet:
+    driver: bridge
+
+services:
+
+  postgres:
+    image: postgres:14.2
+    container_name: banners_rotator_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=banners_rotator
+    volumes:
+      - ../../postgres/data:/var/lib/postgresql/data
+      - ../migrations/init:/docker-entrypoint-initdb.d
+    networks:
+      - localnet
+
+  rabbit:
+    image: rabbitmq:3.9.11-management
+    container_name: banners-mq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - localnet
+
+  migrations:
+    container_name: migrations
+    build:
+      context: .
+      dockerfile: ./build/migrations/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "postgresql://postgres:postgres@postgres:5432/banners_rotator?sslmode=disable"
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs postgres:5432 && sleep 5 && /bin/goose up" ]
+
+  banner:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./build/app/Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+      - rabbit
+    ports:
+      - 8000:8000
+    networks:
+      - localnet
