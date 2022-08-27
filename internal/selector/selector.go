@@ -1,15 +1,17 @@
-package app
+package selector
 
 import (
 	"math"
 	"math/rand"
 
-	"github.com/YuriyNazarov/bannersRotator/internal/storage"
+	"github.com/YuriyNazarov/bannersRotator/internal/app"
 )
 
-func selectBanner(stats []storage.BannerStat) (int, error) {
+type Selector struct{}
+
+func (s Selector) SelectBanner(stats []app.BannerStat) (int, error) {
 	if len(stats) == 0 {
-		return 0, ErrNoBanners
+		return 0, app.ErrNoBanners
 	}
 
 	var (
@@ -51,4 +53,8 @@ func selectBanner(stats []storage.BannerStat) (int, error) {
 
 	// случайный баннер из лучших
 	return bannerIds[rand.Intn(len(bannerIds))], nil //nolint:gosec
+}
+
+func New() *Selector {
+	return &Selector{}
 }

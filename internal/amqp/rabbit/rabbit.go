@@ -1,4 +1,4 @@
-package amqp
+package rabbit
 
 import (
 	"context"
@@ -10,12 +10,26 @@ import (
 	goamqp "github.com/rabbitmq/amqp091-go"
 )
 
+type logger interface {
+	Info(msg string)
+	Error(msg string)
+	Debug(msg string)
+}
+
 type Rabbit struct {
 	exchange string
 	queue    string
 	consumer string
 	channel  *goamqp.Channel
-	logger   Logger
+	logger   logger
+}
+
+type statsMessage struct {
+	BannerID   int       `json:"bannerId"`
+	SlotID     int       `json:"slotId"`
+	GroupID    int       `json:"groupId"`
+	Timestamp  time.Time `json:"timestamp"`
+	ActionType string    `json:"actionType"`
 }
 
 func (q *Rabbit) Click(bannerID, slotID, groupID int, clickTime time.Time) {
@@ -32,7 +46,7 @@ func (q *Rabbit) Click(bannerID, slotID, groupID int, clickTime time.Time) {
 	}
 }
 
-func (q *Rabbit) Show(bannerID, slotID, groupID int, clickTime time.Time) {
+func (q *Rabbit) View(bannerID, slotID, groupID int, clickTime time.Time) {
 	msg := statsMessage{
 		BannerID:   bannerID,
 		SlotID:     slotID,
@@ -46,7 +60,7 @@ func (q *Rabbit) Show(bannerID, slotID, groupID int, clickTime time.Time) {
 	}
 }
 
-func NewRabbit(ctx context.Context, logger Logger, cfg config.QueueCfg) *Rabbit {
+func NewRabbit(ctx context.Context, logger logger, cfg config.QueueCfg) *Rabbit {
 	conn, err := goamqp.Dial(cfg.DSN)
 	if err != nil {
 		logger.Error(fmt.Sprintf("failed on connect to rabblitmq: %s", err))

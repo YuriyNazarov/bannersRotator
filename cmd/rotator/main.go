@@ -8,10 +8,11 @@ import (
 	"syscall"
 	"time"
 
-	internalamqp "github.com/YuriyNazarov/bannersRotator/internal/amqp"
+	internalamqp "github.com/YuriyNazarov/bannersRotator/internal/amqp/rabbit"
 	internalapp "github.com/YuriyNazarov/bannersRotator/internal/app"
 	internalconfig "github.com/YuriyNazarov/bannersRotator/internal/config"
 	"github.com/YuriyNazarov/bannersRotator/internal/logger"
+	internalselector "github.com/YuriyNazarov/bannersRotator/internal/selector"
 	internalserver "github.com/YuriyNazarov/bannersRotator/internal/server"
 	internalstorage "github.com/YuriyNazarov/bannersRotator/internal/storage"
 )
@@ -33,7 +34,8 @@ func main() {
 	storage := internalstorage.New(logg, config.Database.DSN)
 	defer storage.Close()
 
-	app := internalapp.New(logg, storage, amqp)
+	selector := internalselector.New()
+	app := internalapp.New(logg, storage, storage, selector, amqp)
 
 	server := internalserver.NewServer(logg, app, net.JoinHostPort(config.Server.Host, config.Server.Port))
 	go func() {

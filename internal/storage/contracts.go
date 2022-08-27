@@ -2,22 +2,7 @@ package storage
 
 import "errors"
 
-type BannerStat struct {
-	BannerID int
-	Views    int
-	Clicks   int
-}
-
-type BannersRepository interface {
-	AddToSlot(bannerID, slotID int) error
-	DropFromSlot(bannerID, slotID int) error
-	Click(bannerID, slotID, groupID int) error
-	Show(bannerID, slotID, groupID int) error
-	GetStats(slotID, groupID int) ([]BannerStat, error)
-	GetAllBanners(slotID int) ([]int, error)
-}
-
-type Logger interface {
+type logger interface {
 	Info(msg string)
 	Error(msg string)
 	Debug(msg string)

@@ -1,14 +1,14 @@
-package app
+package selector
 
 import (
 	"testing"
 
-	"github.com/YuriyNazarov/bannersRotator/internal/storage"
+	"github.com/YuriyNazarov/bannersRotator/internal/app"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBestBanner(t *testing.T) {
-	bannerStats := []storage.BannerStat{
+	bannerStats := []app.BannerStat{
 		{BannerID: 1, Views: 10, Clicks: 0},
 		{BannerID: 2, Views: 10, Clicks: 5},
 		{BannerID: 3, Views: 10, Clicks: 10},
@@ -16,13 +16,15 @@ func TestBestBanner(t *testing.T) {
 	}
 
 	expectedID := 3
-	bannerID, err := selectBanner(bannerStats)
+	selector := New()
+	bannerID, err := selector.SelectBanner(bannerStats)
 	require.NoError(t, err)
 	require.Equal(t, expectedID, bannerID)
 }
 
 func TestShowAllBanners(t *testing.T) {
-	bannerStats := []storage.BannerStat{
+	selector := New()
+	bannerStats := []app.BannerStat{
 		{BannerID: 1, Views: 99999, Clicks: 1},
 		{BannerID: 2, Views: 99999, Clicks: 1},
 		{BannerID: 3, Views: 99999, Clicks: 1},
@@ -35,7 +37,7 @@ func TestShowAllBanners(t *testing.T) {
 		err      error
 	)
 	for i := 0; i < 100; i++ {
-		bannerID, err = selectBanner(bannerStats)
+		bannerID, err = selector.SelectBanner(bannerStats)
 		require.NoError(t, err)
 		banners = append(banners, bannerID)
 	}
@@ -47,6 +49,7 @@ func TestShowAllBanners(t *testing.T) {
 }
 
 func TestNoBanners(t *testing.T) {
-	_, err := selectBanner([]storage.BannerStat{})
-	require.Equal(t, ErrNoBanners, err)
+	selector := New()
+	_, err := selector.SelectBanner([]app.BannerStat{})
+	require.Equal(t, app.ErrNoBanners, err)
 }

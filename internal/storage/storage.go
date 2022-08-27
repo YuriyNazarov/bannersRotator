@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/YuriyNazarov/bannersRotator/internal/app"
 	_ "github.com/lib/pq" // Postgres driver
 )
 
 type Storage struct {
 	db  *sql.DB
-	log Logger
+	log logger
 }
 
 const (
@@ -63,7 +64,7 @@ func (s *Storage) addAction(bannerID, slotID, groupID, actionID int) error {
 	return nil
 }
 
-func (s *Storage) GetStats(slotID, groupID int) ([]BannerStat, error) {
+func (s *Storage) GetStats(slotID, groupID int) ([]app.BannerStat, error) {
 	query := `select banners_to_slots.banner_id, coalesce(cnt, 0) as cnt, coalesce(action_type, 0) as action_type
 		from banners_to_slots
 		left join (
@@ -77,14 +78,14 @@ func (s *Storage) GetStats(slotID, groupID int) ([]BannerStat, error) {
 	rows, err := s.db.Query(query, slotID, groupID)
 	var (
 		bannerID, count, actionID int
-		bannerStat                BannerStat
+		bannerStat                app.BannerStat
 		ok                        bool
 	)
-	statMap := make(map[int]BannerStat)
+	statMap := make(map[int]app.BannerStat)
 
 	if err != nil {
 		s.log.Error(fmt.Sprintf("err on getting stats: %s", err))
-		return []BannerStat{}, ErrOperationFail
+		return []app.BannerStat{}, ErrOperationFail
 	}
 	defer rows.Close()
 
@@ -96,7 +97,7 @@ func (s *Storage) GetStats(slotID, groupID int) ([]BannerStat, error) {
 		}
 		bannerStat, ok = statMap[bannerID]
 		if !ok {
-			bannerStat = BannerStat{BannerID: bannerID}
+			bannerStat = app.BannerStat{BannerID: bannerID}
 		}
 		if actionID == view {
 			bannerStat.Views = count
@@ -108,7 +109,7 @@ func (s *Storage) GetStats(slotID, groupID int) ([]BannerStat, error) {
 	if rows.Err() != nil {
 		s.log.Error(fmt.Sprintf("err after scanning stats: %s", err))
 	}
-	stats := make([]BannerStat, len(statMap))
+	stats := make([]app.BannerStat, len(statMap))
 	i := 0
 	for _, v := range statMap {
 		stats[i] = v
@@ -148,7 +149,7 @@ func (s *Storage) GetAllBanners(slotID int) ([]int, error) {
 	return banners, nil
 }
 
-func New(l Logger, dsn string) *Storage {
+func New(l logger, dsn string) *Storage {
 	storageInstance := Storage{
 		log: l,
 	}

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/YuriyNazarov/bannersRotator/internal/app"
@@ -46,8 +45,5 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	if err := s.server.Shutdown(ctx); err != nil {
-		s.logger.Error(fmt.Sprintf("err on server shutdown: %s", err))
-	}
-	return nil
+	return s.server.Shutdown(ctx)
 }
